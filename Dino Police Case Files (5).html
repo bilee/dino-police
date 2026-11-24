@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dino Police Case Files</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&family=Bungee&display=swap" rel="stylesheet">
+<style>
+/* VOICE: a bold, cool game for an 8-year-old learning to read; nothing babyish.
+   IDEA: a police case file: clues to decode, suspects to pick, raptors to lock up.
+   PICTURE: Officer Rex (an SVG T-rex cop) at HQ; in play the clue word itself is the picture.
+   COLOUR and TYPE: police blue fields, white case cards, caution-tape yellow, dino green. Bungee signs; Andika letters, made for new readers.
+   LAYOUT: one column; a big word, big tap targets, stacks cleanly on a phone. */
+:root{color-scheme:light dark;--bg:#1d4ed8;--card:#ffffff;--ink:#0f172a;--soft:#e8eefc;--muted:#475569;--sel:#dbe6ff;--okbg:#d7f5e3;--tape:#ffd400;--green:#1fa45a;--red:#e11d48}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0f2a6e;--card:#16204a;--ink:#eef2ff;--soft:#22306a;--muted:#b6c2e8;--sel:#2a3f8f;--okbg:#174a33}}
+:root[data-theme=light]{color-scheme:light}
+:root[data-theme=dark]{color-scheme:dark;--bg:#0f2a6e;--card:#16204a;--ink:#eef2ff;--soft:#22306a;--muted:#b6c2e8;--sel:#2a3f8f;--okbg:#174a33}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.5 Andika,"Comic Sans MS",system-ui,sans-serif;overflow-x:clip;min-height:100vh}
+h1,h2,h3,.sign{font-family:Bungee,Impact,sans-serif;font-weight:400;line-height:1.05;margin:0;text-wrap:balance}
+.tape{background:repeating-linear-gradient(-45deg,var(--tape) 0 22px,#111 22px 44px);height:14px}
+.tape.words{height:auto;background:var(--tape);color:#111;text-align:center;font:15px Bungee,sans-serif;padding:6px 8px;white-space:nowrap;overflow:hidden}
+.wrap{max-width:900px;margin:0 auto;padding:clamp(16px,3vw,32px) max(4vw,14px) 40px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;color:#fff;flex-wrap:wrap}
+.top h1{font-size:clamp(26px,5vw,40px)}
+.pill{background:rgba(255,255,255,.16);color:#fff;border-radius:99px;padding:6px 14px;font-weight:700;font-size:15px}
+.card{background:var(--card);border-radius:22px;padding:clamp(18px,3vw,30px);margin-top:18px;box-shadow:0 10px 0 rgba(0,0,0,.18)}
+.hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:18px;align-items:center}
+.hero svg{width:100%;max-width:300px;height:auto;display:block;margin:auto}
+.hero h2{font-size:clamp(24px,4vw,34px);color:var(--bg)}
+:root[data-theme=dark] .hero h2{color:#9fb6ff}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]) .hero h2{color:#9fb6ff}}
+.hero p{margin:.6em 0 0;font-size:18px}
+button{font:inherit;cursor:pointer;border:0;border-radius:14px;min-height:48px;padding:10px 18px;font-weight:700}
+button:focus-visible{outline:4px solid var(--tape);outline-offset:3px}
+.btn{background:var(--bg);color:#fff;box-shadow:0 5px 0 rgba(0,0,0,.28)}
+.btn:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.28)}
+.btn.go{background:var(--green)}.btn.ghost{background:var(--soft);color:var(--ink)}
+.row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:16px}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+.modes button{background:var(--soft);color:var(--ink);text-align:left;padding:14px 16px;border:3px solid transparent}
+.modes button[aria-pressed=true]{border-color:var(--bg);background:var(--sel)}
+.modes b{display:block;font:18px Bungee,sans-serif}
+.ranks{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,250px),1fr));gap:12px;margin-top:14px}
+.rank{background:var(--soft);color:var(--ink);text-align:left;display:grid;gap:2px;padding:14px 16px;border-radius:16px}
+.rank .sign{font-size:20px}.rank small{color:var(--muted);font-size:15px}
+.rank[disabled]{opacity:.45;cursor:not-allowed}
+.rank .jail{font-size:15px;font-weight:700;color:var(--green)}
+h3.sign{font-size:20px;margin-top:22px}
+.case{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.case .sign{font-size:18px;color:var(--muted)}
+.dots{display:flex;gap:6px}.dot{width:20px;height:20px;border-radius:50%;background:var(--soft);border:2px solid var(--muted)}
+.dot.on{background:var(--tape);border-color:#b38f00}
+.clue{text-align:center;margin-top:10px}
+.clue .lab{font:15px Bungee,sans-serif;color:var(--muted)}
+.tiles{display:flex;justify-content:center;gap:clamp(6px,1.5vw,12px);margin:14px 0 4px;flex-wrap:nowrap}
+.tile{font:700 clamp(44px,11vw,88px)/1 Andika,sans-serif;background:var(--soft);color:var(--ink);border-radius:16px;min-width:clamp(54px,13vw,104px);padding:12px 8px 16px;box-shadow:0 5px 0 rgba(0,0,0,.15);transition:background .2s,transform .2s}
+.tile.lit{background:var(--tape);color:#111;transform:translateY(-4px)}
+.tile.silent{color:var(--muted);font-size:clamp(36px,9vw,70px);position:relative}
+.tile.silent::after{content:"silent";position:absolute;left:0;right:0;bottom:2px;font-size:12px;font-weight:700}
+.road{height:40px;position:relative;max-width:100%;margin:0 auto}
+.car{position:absolute;top:0;font-size:32px;left:0;transition:left .55s linear;transform:scaleX(-1)}
+.msg{text-align:center;font-size:20px;font-weight:700;min-height:1.6em;margin-top:12px}
+.msg.good{color:var(--green)}.msg.try{color:var(--red)}
+.sus{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:16px}
+.sus button{background:var(--soft);font-size:clamp(52px,12vw,84px);line-height:1;padding:18px 6px;border:4px solid transparent}
+.sus button.right{border-color:var(--green);background:var(--okbg)}
+.sus button.wrong{opacity:.3}
+.pic{font-size:clamp(80px,20vw,130px);text-align:center;line-height:1.1}
+.slots{display:flex;justify-content:center;gap:8px;margin:10px 0}
+.slot{font:700 clamp(40px,10vw,72px)/1 Andika,sans-serif;min-width:clamp(50px,12vw,90px);height:clamp(64px,15vw,104px);border-bottom:6px solid var(--muted);display:grid;place-items:center}
+.slot.f{border-color:var(--green)}
+.bank{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:14px}
+.bank button{font:700 clamp(32px,8vw,50px)/1 Andika,sans-serif;background:var(--soft);color:var(--ink);min-width:72px;min-height:72px;box-shadow:0 5px 0 rgba(0,0,0,.15)}
+.bank button:disabled{opacity:.2}
+.shake{animation:sh .35s}
+@keyframes sh{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.cell{width:170px;height:170px;margin:10px auto;border-radius:20px;background:var(--soft);display:grid;place-items:center;font-size:96px;position:relative;overflow:hidden}
+.cell::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 22px,#4b5563 22px 32px)}
+.win{text-align:center}.win h2{font-size:clamp(26px,5vw,38px)}
+details{margin-top:18px;background:var(--soft);border-radius:16px;padding:12px 16px}
+summary{font-weight:700;cursor:pointer;min-height:32px}
+details li{margin:.35em 0}
+@media(max-width:600px){.hero{grid-template-columns:1fr}.hero svg{max-width:200px}.modes{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="tape words">DINO POLICE · DO NOT CROSS · DINO POLICE · DO NOT CROSS · DINO POLICE · DO NOT CROSS · DINO POLICE</div>
+<div class="wrap">
+  <div class="top"><h1>Dino Police</h1><span class="pill" id="stat"></span></div>
+  <main id="app"></main>
+</div>
+<div class="tape"></div>
+<script>
+{
+const LV=[
+ {n:'Cadet',t:'Short a words',w:'cat:🐱 hat:🎩 bat:🦇 map:🗺️ van:🚐 rat:🐀 cap:🧢 man:👨 pan:🍳 ant:🐜 bag:👜 ram:🐏'},
+ {n:'Rookie',t:'Short i and a, mixed',w:'pig:🐷 pin:📌 lip:👄 six:6️⃣ bin:🗑️ kid:🧒 cat:🐱 hat:🎩 van:🚐 map:🗺️ rat:🐀 cap:🧢'},
+ {n:'Officer',t:'Short o and u',w:'dog:🐶 log:🪵 box:📦 fox:🦊 cop:👮 hot:🥵 pot:🍲 bus:🚌 sun:☀️ cup:☕ bug:🐛 hug:🤗 nut:🥜 run:🏃 tub:🛁'},
+ {n:'Detective',t:'Short e, plus all the vowels',w:'bed:🛏️ pen:🖊️ hen:🐔 net:🥅 web:🕸️ leg:🦵 ten:🔟 jet:✈️ e|gg:🥚 red:🔴 pig:🐷 cat:🐱 sun:☀️ dog:🐶 box:📦'},
+ {n:'K-9 Unit',t:'Two consonants together',w:'frog:🐸 crab:🦀 drum:🥁 flag:🚩 sled:🛷 plug:🔌 stop:🛑 swim:🏊 hand:✋ tent:⛺ milk:🥛 gift:🎁 mask:😷 drop:💧'},
+ {n:'Sergeant',t:'sh, ch, th, ck, ng, ll',w:'sh|i|p:🚢 f|i|sh:🐟 sh|e|ll:🐚 ch|i|ck:🐤 d|u|ck:🦆 s|o|ck:🧦 r|o|ck:🪨 l|o|ck:🔒 b|a|th:🛁 r|i|ng:💍 k|i|ng:🤴 b|e|ll:🔔 c|a|sh:💵 t|r|u|ck:🚚'},
+ {n:'Chief',t:'Silent e makes the vowel say its name',w:'c|a|k|e_:🎂 b|i|k|e_:🚲 k|i|t|e_:🪁 b|o|n|e_:🦴 r|o|p|e_:🪢 f|i|v|e_:5️⃣ n|i|n|e_:9️⃣ r|o|s|e_:🌹 c|u|b|e_:🧊 s|n|a|k|e_:🐍 g|a|m|e_:🎮 p|l|a|n|e_:✈️ s|m|i|l|e_:😃 h|o|m|e_:🏠'}
+].map(l=>({...l,words:l.w.split(' ').map(s=>{const i=s.indexOf(':'),sp=s.slice(0,i),g=sp.includes('|')?sp.split('|'):[...sp];return{g,e:s.slice(i+1),word:g.map(x=>x.replace('_','')).join('')}})}));
+const GOAL=8,KEY='dinoPoliceSave';
+let save={unl:1,caught:LV.map(()=>0),mode:'read'};
+try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.caught)save={...save,...s}}catch(e){}
+const store=()=>{try{localStorage.setItem(KEY,JSON.stringify(save))}catch(e){}};
+const app=document.getElementById('app'),stat=document.getElementById('stat');
+let lvl=0,count=0,queue=[],cur=null,wrong=0,idx=0,busy=false;
+const shuf=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+const clean=g=>g.replace('_','');
+function speak(t,r=.8){try{const ss=speechSynthesis,u=new SpeechSynthesisUtterance(t);u.rate=r;u.lang='en-US';u.volume=1;if(ss.speaking||ss.pending){ss.cancel();setTimeout(()=>ss.speak(u),120)}else ss.speak(u);if(ss.paused)ss.resume()}catch(e){const m=document.getElementById('msg');if(m)m.textContent='This browser cannot speak words. Try Chrome, Safari or Edge.'}}
+const SND={b:['buh','bat'],c:['kuh','cat'],d:['duh','dog'],f:['ffffffff','fish'],g:['guh','goat'],h:['huh','hat'],j:['juh','jet'],k:['kuh','kite'],l:['lllllll','lion'],m:['mmmmmmm','map'],n:['nnnnnnn','net'],p:['puh','pig'],r:['rrrrrrr','rat'],s:['sssssssss','sun'],t:['tuh','top'],v:['vvvvvvv','van'],w:['wuh','web'],x:['ks','box'],y:['yuh','yes'],z:['zzzzzzzz','zip'],a:['aaah','apple'],e:['ehhh','egg'],i:['ihhh','itch'],o:['ahhh','octopus'],u:['uhhh','up'],sh:['shhhhhhh','ship'],ch:['chuh','chin'],th:['thhhhh','thumb'],ck:['kuh','duck'],ng:['nnngg','ring'],ll:['lllllll','bell'],gg:['guh','egg']};
+function sayTile(g){if(g.endsWith('_')){msg('Silent e makes no sound. It makes the vowel say its name.');return}const s=SND[g];if(!s)return;msg(g==='x'?'"x" sounds like the end of "box"':`"${g}" sounds like the start of "${s[1]}"`)}
+function updStat(){const n=save.caught.reduce((a,b)=>a+b,0);stat.textContent=`Rank: ${LV[save.unl-1].n} · Raptors caught: ${n}`}
+const REX=`<svg viewBox="0 0 220 200" role="img" aria-label="Officer Rex, a T-rex police officer">
+<ellipse cx="105" cy="188" rx="70" ry="9" fill="rgba(0,0,0,.18)"/>
+<path d="M60 140 Q10 150 4 120 Q30 135 66 118Z" fill="#178a4b"/>
+<ellipse cx="90" cy="135" rx="44" ry="48" fill="#1fa45a"/>
+<ellipse cx="98" cy="145" rx="26" ry="32" fill="#8fe0a8"/>
+<rect x="64" y="166" width="20" height="22" rx="8" fill="#178a4b"/><rect x="98" y="166" width="20" height="22" rx="8" fill="#178a4b"/>
+<path d="M118 118 q16 4 16 14" stroke="#178a4b" stroke-width="8" fill="none" stroke-linecap="round"/>
+<path d="M78 92 Q70 50 110 44 L170 48 Q198 52 198 74 Q198 96 170 98 L120 100 Q100 104 96 112Z" fill="#1fa45a"/>
+<path d="M122 86 L192 86" stroke="#0f5c33" stroke-width="4" stroke-linecap="round"/>
+<path d="M132 86 l5 7 5-7 M150 86 l5 7 5-7 M168 86 l5 7 5-7" fill="#fff"/>
+<circle cx="140" cy="62" r="10" fill="#fff"/><circle cx="143" cy="63" r="5" fill="#111"/>
+<path d="M98 50 Q104 22 140 20 Q176 22 178 46Z" fill="#1d4ed8"/>
+<rect x="92" y="44" width="96" height="10" rx="5" fill="#0b2a8a"/>
+<path d="M138 26 l3 7 7 .5-5.5 4.5 2 7-6.5-4-6.5 4 2-7-5.5-4.5 7-.5Z" fill="#ffd400"/>
+<path d="M96 128 l6 6 10-12" stroke="#ffd400" stroke-width="5" fill="none"/></svg>`;
+function home(){
+ updStat();
+ app.innerHTML=`<section class="card hero">${REX}<div><h2>The Raptor Gang broke out of Dino Jail!</h2><p>Officer Rex needs a new partner. Read the secret clues to track down each raptor and lock it back up.</p></div></section>
+ <section class="card"><h3 class="sign" style="margin-top:0">Pick your mission</h3>
+ <div class="modes"><button data-mode="read" aria-pressed="${save.mode==='read'}"><b>Read the clue</b>Sound out the word, then pick the matching suspect.</button>
+ <button data-mode="build" aria-pressed="${save.mode==='build'}"><b>Write the report</b>Hear the word and build it from letter tiles.</button></div>
+ <h3 class="sign">Choose your rank</h3>
+ <div class="ranks">${LV.map((l,i)=>`<button class="rank" data-l="${i}" ${i>=save.unl?'disabled':''}><span class="sign">${i+1}. ${l.n}</span><small>${l.t}</small><small>${l.words.slice(0,3).map(w=>w.word).join(', ')}</small><span class="jail">${i>=save.unl?'Locked: catch a raptor at the rank before':save.caught[i]?`Raptors caught: ${save.caught[i]}`:'Ready'}</span></button>`).join('')}</div>
+ <details><summary>For grown-ups: how to play</summary><ul>
+ <li><b>Read the clue:</b> he taps each letter and says its sound out loud, then blends them into a word. "Blend it" sends the police car under the letters to show smooth blending ("mmmaaap"). The suspect pictures stay hidden until he says he's read the word, so he can't guess from the pictures.</li>
+ <li><b>Write the report:</b> the game says a word and he builds it. This trains splitting a word into its sounds, the reverse of blending.</li>
+ <li>8 correct answers catch a raptor and unlock the next rank. Mistakes never cost points.</li>
+ <li>Sit beside him and listen as he sounds words out. 10 minutes a day is plenty. If he's stuck at one rank, stay there for a while, since repetition is the point.</li>
+ <li>The game says words using your device's voice. If you hear nothing, check the volume or try another browser.</li></ul>
+ <div class="row" style="justify-content:flex-start"><button class="btn" id="test">Test the voice</button><button class="btn ghost" id="all">Unlock all ranks</button><button class="btn ghost" id="reset">Reset progress</button></div></details></section>`;
+}
+function start(i){lvl=i;count=0;queue=[];next()}
+function pick(){if(!queue.length){queue=shuf(LV[lvl].words);if(cur&&queue[0]===cur)queue.push(queue.shift())}return queue.shift()}
+function dots(){return `<div class="dots" aria-label="${count} of ${GOAL}">${Array.from({length:GOAL},(_,i)=>`<span class="dot ${i<count?'on':''}"></span>`).join('')}</div>`}
+function head(){return `<div class="case"><span class="sign">${LV[lvl].n} · Case ${save.caught[lvl]+1}</span>${dots()}</div>`}
+function next(){cur=pick();wrong=0;idx=0;busy=false;save.mode==='read'?readRound():buildRound()}
+function tilesHTML(){return cur.g.map((g,i)=>`<button class="tile ${g.endsWith('_')?'silent':''}" data-t="${i}">${clean(g)}</button>`).join('')}
+function readRound(){
+ app.innerHTML=`<section class="card">${head()}<div class="clue"><div class="lab">Secret clue</div>
+ <div class="tiles" id="tiles">${tilesHTML()}</div><div class="road" id="road"><span class="car" id="car">🚓</span></div>
+ <div class="msg" id="msg">Tap each letter and say its sound. Then blend them together!</div>
+ <div class="row"><button class="btn ghost" id="blend">Blend it</button><button class="btn go" id="show">I read it! Show suspects</button></div>
+ <div class="sus" id="sus" hidden></div><div class="row" id="after"></div></div>
+ <div class="row"><button class="btn ghost" id="hq">Back to HQ</button></div></section>`;
+ placeCar(0);
+}
+function placeCar(i){const t=document.querySelectorAll('.tile'),road=document.getElementById('road'),car=document.getElementById('car');if(!t[i]||!road)return;const r=road.getBoundingClientRect(),b=t[i].getBoundingClientRect();car.style.left=(b.left-r.left+b.width/2-18)+'px'}
+function blend(){
+ if(busy)return;busy=true;const t=[...document.querySelectorAll('.tile')],word=cur.word;t.forEach(x=>x.classList.remove('lit'));
+ let i=0;
+ const step=()=>{if(i<t.length){placeCar(i);t[i].classList.add('lit');i++;setTimeout(step,900)}else{t.forEach(x=>x.classList.add('lit'));speak(word,.8);msg(`Blended: "${word}"`,'good');setTimeout(()=>{t.forEach(x=>x.classList.remove('lit'));placeCar(0);busy=false},1500)}};step();
+}
+function showSus(){
+ const others=LV[lvl].words.filter(w=>w!==cur&&w.e!==cur.e);
+ const sc=w=>(w.g[0]===cur.g[0]?2:0)+(w.g[w.g.length-1]===cur.g[cur.g.length-1]?2:0)+(w.g.length===cur.g.length?1:0)+Math.random()*2;
+ const opts=shuf([cur,...others.sort((a,b)=>sc(b)-sc(a)).slice(0,2)]);
+ const s=document.getElementById('sus');s.hidden=false;document.getElementById('show').hidden=true;
+ s.innerHTML=opts.map(o=>`<button data-w="${o.word}" aria-label="suspect">${o.e}</button>`).join('');
+ msg('Which suspect matches the clue?');
+}
+function msg(t,c=''){const m=document.getElementById('msg');if(m){m.textContent=t;m.className='msg '+c}}
+function shake(el){el.classList.remove('shake');void el.offsetWidth;el.classList.add('shake')}
+function choose(b){
+ if(b.classList.contains('wrong')||document.querySelector('.sus .right'))return;
+ if(b.dataset.w===cur.word){b.classList.add('right');speak(cur.word);msg(`Got it! The clue says "${cur.word}".`,'good');win()}
+ else{b.classList.add('wrong');shake(b);wrong++;
+  if(wrong>=2){speak(cur.word,.6);msg(`Listen: "${cur.word}". Now which one?`,'try')}else msg('Not that suspect. Sound it out again!','try')}
+}
+function buildRound(){
+ const pool=[...new Set(LV[lvl].words.flatMap(w=>w.g.map(clean)))].filter(g=>!cur.g.map(clean).includes(g));
+ const bank=shuf([...cur.g.map(clean),...shuf(pool).slice(0,2)]);
+ app.innerHTML=`<section class="card">${head()}<div class="clue"><div class="lab">Write the report</div>
+ <div class="pic">${cur.e}</div><div class="row" style="margin-top:4px"><button class="btn" id="hear">Hear it again</button></div>
+ <div class="slots">${cur.g.map(()=>`<span class="slot"></span>`).join('')}</div>
+ <div class="msg" id="msg">Listen to the word. Tap its sounds in order.</div>
+ <div class="bank">${bank.map(g=>`<button data-b="${g}">${g}</button>`).join('')}</div><div class="row" id="after"></div></div>
+ <div class="row"><button class="btn ghost" id="hq">Back to HQ</button></div></section>`;
+ speak(cur.word);
+}
+function place(b){
+ if(idx>=cur.g.length)return;
+ if(b.dataset.b===clean(cur.g[idx])){const s=document.querySelectorAll('.slot')[idx];s.textContent=b.dataset.b;s.classList.add('f');b.disabled=true;idx++;
+  if(idx===cur.g.length){speak(cur.word);msg(`Report done: "${cur.word}"!`,'good');win()}else msg('Good! What sound comes next?')}
+ else{shake(b);wrong++;speak(cur.word,.55);msg('Hmm, not that one. Listen again: stretch the word out slowly.','try')}
+}
+function win(){
+ count++;document.querySelector('.dots').outerHTML=dots();
+ const a=document.getElementById('after');
+ if(count>=GOAL){a.innerHTML=`<button class="btn go" id="catch">Catch the raptor!</button>`}
+ else a.innerHTML=`<button class="btn go" id="next">Next clue</button>`;
+ a.querySelector('button').focus();
+}
+function caught(){
+ save.caught[lvl]++;let unlocked='';if(lvl+1===save.unl&&save.unl<LV.length){save.unl++;unlocked=LV[save.unl-1].n}
+ store();updStat();speak(unlocked?`You caught a raptor! You are now a ${unlocked}!`:'You caught a raptor!',.95);
+ app.innerHTML=`<section class="card win"><h2>Raptor caught!</h2><div class="cell">🦖</div>
+ <p style="font-size:20px">${unlocked?`Promotion! You are now a <b>${unlocked}</b>. New clues unlocked.`:`That's ${save.caught[lvl]} raptor${save.caught[lvl]>1?'s':''} locked up at ${LV[lvl].n} rank.`}</p>
+ <div class="row">${unlocked?`<button class="btn go" data-l="${save.unl-1}">Start ${unlocked} missions</button>`:''}<button class="btn ${unlocked?'ghost':'go'}" id="again">Another case</button><button class="btn ghost" id="hq">Back to HQ</button></div></section>`;
+}
+let primed=false;
+app.addEventListener('click',e=>{
+ if(!primed){primed=true;try{const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u)}catch(err){}}
+ const t=e.target.closest('button');if(!t)return;
+ if(t.dataset.mode){save.mode=t.dataset.mode;store();home();return}
+ if(t.dataset.l!==undefined&&!t.disabled){start(+t.dataset.l);return}
+ if(t.dataset.t!==undefined){t.classList.toggle('lit');placeCar(+t.dataset.t);sayTile(cur.g[+t.dataset.t]);return}
+ if(t.dataset.w){choose(t);return}
+ if(t.dataset.b){place(t);return}
+ const id=t.id;
+ if(id==='blend')blend();else if(id==='show')showSus();else if(id==='next')next();else if(id==='catch')caught();
+ else if(id==='again')start(lvl);else if(id==='hq')home();else if(id==='hear')speak(cur.word,.7);
+ else if(id==='test')speak('Officer Rex reporting for duty!',.9);
+ else if(id==='all'){save.unl=LV.length;store();home()}
+ else if(id==='reset'){save={unl:1,caught:LV.map(()=>0),mode:save.mode};store();home()}
+});
+addEventListener('resize',()=>{if(document.getElementById('car'))placeCar(0)});
+home();
+}
+</script>
+</body>
+</html>
